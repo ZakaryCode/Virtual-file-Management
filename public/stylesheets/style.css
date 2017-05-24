@@ -1,0 +1,132 @@
+div 	{
+	display: block;
+}
+/*页面背景*/
+body 	{
+	background-color:rgb(44, 52, 55);
+	display: block;
+  margin: 12px;
+  width: 95%;
+  margin: auto;
+  font: "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+/*页面标题*/
+#header 	{
+	text-align: center;
+	color:#EEEEEE;
+}
+#toolsBar	{
+	width: 100%;
+	background-color: #444444;
+	color: #DDDDDD;
+	height: 1em;
+	line-height:1em;
+	padding: 0.35em 0 0.45em;
+	margin: auto;
+	border: 0;
+}
+#toolsLeft	{
+	float: left;
+	padding-left: 1em;
+}
+#toolsRight	{
+	float: right;
+	padding-right: 1em;
+}
+/*编译器主体*/
+#body {
+	background-color: #222222;
+	color: #EEEEEE;
+	margin: 0 0 3em;
+	width: 100%;
+}
+#body>div{
+	outline: none;
+	height: 100%;
+	position: relative;
+	overflow-x: hidden;
+}
+#CodeEditing>div{
+	display: -webkit-box !important;
+	display: box !important;
+	position:relative;
+}
+pre 	{
+	height: auto;
+	margin: 0;
+	padding: 0.05em;
+	min-height: 1em;
+	line-height: 1em;
+}
+span 	{
+	padding: 0;
+	border: 0;
+	margin: 0;
+	font-size: 1em;
+	min-height: 1em;
+	line-height: 1em;
+	text-indent: 0.5em;
+	text-align: left;
+}
+blockquote{
+	padding: 0;
+	border: 0;
+	margin: 0;
+	min-height: 1em;
+	line-height: 1em;
+	text-indent: 0.5em;
+	text-align: left;
+}
+p{
+	padding: 0;
+	border: 0;
+	margin: 0;
+	font-size: 1em;
+	min-height: 1em;
+	line-height:1em;
+}
+input 	{
+	padding: 0 0 0 0.5em;
+	border: 0;
+	margin: 0;
+	outline: none;
+	width: 100%;
+	height: 1.5em;
+	line-height: 1.5em;
+	color: #EEEEEE;
+	background-color: rgba(0,0,0,0);
+}
+#codeInput{
+	padding: 0.5em;
+	border-top:1px #333333 solid;
+}
+.codeLine{
+	/*padding: 0.25em;*/
+}
+.CodeEditing-text{
+	padding: 0.05em;
+}
+.CodeEditing-textInput{
+	padding: 0.05em;
+	height: 1.5em;
+	line-height: 1.5em;
+}
+/*
+编译器进度条
+ */
+#body>div::-webkit-scrollbar-track
+{
+	-webkit-box-shadow: inset 0 0 6px rgba(15,15,15,0.3);
+	background-color: #EEEEEE;
+}
+
+#body>div::-webkit-scrollbar
+{
+	width: 8px;
+	background-color: #EEEEEE;
+}
+
+#body>div::-webkit-scrollbar-thumb
+{
+	background-color: #151515;
+}

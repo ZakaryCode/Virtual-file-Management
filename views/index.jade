@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  div#header
+   h1(ResourceStorageStatus= ResourceStorageStatus)= title
+  div#toolsBar
+   div#toolsLeft 当前地址:
+    b FILE://
+   div#toolsRight 当前账户:
+    - var attributes = {'Group': 'ROOT'};
+    b(style={color:'#999'})&attributes(attributes) 未登录
+   div(style={clear:'both'})
+  div#body
+   div(tabindex ='-1')
+    div(style={position:'relative',top:'0',margin:'1em'})
+     div#CodeEditing
+      div#codeInput
+       pre.CodeEditing-textInput &nbsp;
+       pre.CodeEditing-textInput >
+       pre
+        input(type='text')
+  script(type='text/javascript',src='./javascripts/jquery.min.js') 
+  script(type='text/javascript',src='./javascripts/Compiler.js') 
+  script(type='text/javascript',src='./javascripts/Folder.js') 
+  script(type='text/javascript',src='./javascripts/Login.js') 
+  script(type='text/javascript',src='./javascripts/main.js') 
