@@ -6,7 +6,7 @@ var DATE = require( path.join(__dirname, '/setDateObj') );
 	用户对象设置
  */
 exports = module.exports = function( LeaderDir, data ){	// Group, Name, Password, NickName, Gender, Age
-	console.log(LeaderDir,data);
+	// console.log(LeaderDir,data);
 	try{
 		// this.Group = ( data.Group && data.Group != "" ? data.Group : LeaderDir ),										//用户组——————————|————ROOT:权限组 USER:非权限组
 		this.Name = ( data.Name && data.Name != "" ? data.Name : LeaderDir + LeaderDir.UserTotal ),			//用户名——————————|————自动名称为:组名+Number
@@ -104,18 +104,18 @@ exports.prototype.Status = function( data ){
 }
 
 /* 快捷工具函数 */
-// 字段存在性验证
-function isFieldExists(e){
-	if (e&&e!=undefined) {
-		return true;
-	}else{
-		return false;
+	// 字段存在性验证
+	function isFieldExists(e){
+		if (e&&e!=undefined) {
+			return true;
+		}else{
+			return false;
+		}
 	}
-}
-//判断对象是否为空
-function isEmptyObject(e){
-    var t;
-    for (t in e)
-        return !1;
-    return !0;
-};
+	//判断对象是否为空
+	function isEmptyObject(e){
+	    var t;
+	    for (t in e)
+	        return !1;
+	    return !0;
+	};

@@ -39,7 +39,7 @@ exports = module.exports = function( LeaderDir, data ){ // Name, Jurisdiction
 }
 // 本地用户组初始化
 exports.prototype.init = function( data ){
-	console.log("初始化"+data)
+	// console.log("初始化"+data);
 	if ( isFieldExists(data) ) {
 		for ( key in data ) {
 			this.createUser( data[key] );
@@ -62,10 +62,10 @@ exports.prototype.createUser = function( data ){
 		data = {};
 	if ( !isFieldExists(data.Name) || data.Name == "" )
 		data.Name = this.Name + (this.UsersIncluded.length||0);
-	if( isFieldExists(this.UsersIncluded[data.Name]) ){
-		feedback["STATUS"] = STATUS["999"];	//该文件已存在!
-		return feedback;
-	}
+	// if( isFieldExists(this.UsersIncluded[data.Name]) ){
+	// 	feedback["STATUS"] = STATUS["999"];	//该用户已存在!
+	// 	return feedback;
+	// }
 	// console.log("新建用户:"+JSON.stringify(data));
 	this.UsersIncluded[data.Name] = new Login( this, (data||"") );
 	feedback["DATA"] = this.UsersIncluded[data.Name];
@@ -134,18 +134,18 @@ exports.prototype.Status = function( data ){
 }
 
 /* 快捷工具函数 */
-// 字段存在性验证
-function isFieldExists(e){
-	if (e&&e!=undefined) {
-		return true;
-	}else{
-		return false;
+	// 字段存在性验证
+	function isFieldExists(e){
+		if (e&&e!=undefined) {
+			return true;
+		}else{
+			return false;
+		}
 	}
-}
-//判断对象是否为空
-function isEmptyObject(e){
-    var t;
-    for (t in e)
-        return !1;
-    return !0;
-};
+	//判断对象是否为空
+	function isEmptyObject(e){
+	    var t;
+	    for (t in e)
+	        return !1;
+	    return !0;
+	};

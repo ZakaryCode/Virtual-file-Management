@@ -6,11 +6,6 @@ var Dir = new ResourceStorage();	//	文件资源管理器
 /* 检测本地文件，初始化并检测状况 */
 Dir.init();
 
-/* 每五分钟中执行一次文件存储 */
-var Interval = setInterval(function() {
-  Dir.Save();
-}, 300000);
-
 exports = module.exports = function(ajaxQuery,ajaxBodeReques,callback){
 	// 验证回调正确
 	if (typeof callback == "function") {
@@ -426,12 +421,21 @@ exports.prototype.newFolder = function(data){
 	// 当前目录验证
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 	if( temp.states ) {
-		// 判断[登陆]用户是否有该文件修改权限
-		if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,4) ) return;
-		var tempFun = Dir.createFile(temp.Dir,data["currentOperation"].OpObject[Name]);
-		TempForResponse = tempFun.DATA;
-		this.turnBack(tempFun["STATUS"].Num,TempForResponse);
-		return;
+			// console.log(temp);
+		// 文件夹判断
+		if ( isFolder(temp.Dir.Type) ) {
+			// 判断[登陆]用户是否有该文件修改权限
+			if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,4) ) return;
+			// console.log(data["currentOperation"].OpObject);
+			var tempFun = Dir.createFile(temp.Dir.Contain,data["currentOperation"].OpObject);
+			TempForResponse = tempFun.DATA;
+			this.turnBack(tempFun["STATUS"].Num,TempForResponse);
+			return;
+		}else{
+			// 文件下无法创建新文件
+			this.turnBack("999",TempForResponse);
+			return;
+		}
 	}else{
 		// 目录读取失败
 		this.turnBack("999",TempForResponse);
@@ -585,7 +589,7 @@ exports.prototype.alterFolder = function(data){
 			states:false,
 			Dir:Dir
 		}
-		// console.log(Data[0]);
+		// console.log(Dir["Folder"]);
 		if (Data.length<1){
 			return temp;
 		}	else if (Data.length == 1 && Data[0] == "FILE"){
@@ -605,7 +609,7 @@ exports.prototype.alterFolder = function(data){
 /* POST返回数据方法 */
 	// 返回方法
 	exports.prototype.turnBack = function( num, data ){
-		console.log(num,data);
+		// console.log(num,data);
 		var temp = {};
 		if (isFieldExists(data)) {
 			this.Response(data);

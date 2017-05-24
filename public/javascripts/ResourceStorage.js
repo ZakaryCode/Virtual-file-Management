@@ -2,6 +2,7 @@ var path = require('path');
 var fs = require("fs");
 var $ = require("jquery");
 var GOBAL = {};
+var Interval;
 GOBAL.STATUS = require( path.join(__dirname, '/setStatusObj') );
 GOBAL.Login = require( path.join(__dirname, '/setGroupObj') );	//用户组管理文件
 GOBAL.Folder = require( path.join(__dirname, '/setFolderObj') );	//文件资源管理文件
@@ -80,7 +81,34 @@ exports.prototype.Initialization = function( data ){
 				initStatus = false;
 			}
 		}
-	this.Save();
+	var tempData = {
+		"ROOT":{
+			"Name":"ROOT",
+			"Jurisdiction":1
+		},
+		"USERS":{
+			"Name":"USERS",
+			"Jurisdiction":0
+		},
+		"Folder":{
+			"Name":"Folder",
+			"Type":"文件夹"
+		}
+	};
+	do{
+		// console.log(JSON.stringify(this.Folder));
+		if ( !isFieldExists(data["Login"]["ROOT"]) && !isFieldExists(this["Login"]["ROOT"]) ) {
+			this.createNew("Login",tempData["ROOT"]);
+		}else	if ( !isFieldExists(data["Login"]["USERS"]) && !isFieldExists(this["Login"]["USERS"]) ) {
+			this.createNew("Login",tempData["USERS"])
+		}else	if ( !isFieldExists(data) && !isFieldExists(this["Folder"]) ) {
+			this["Folder"] = {};
+			this.createFile(this["Folder"],tempData["Folder"])
+		}else{
+			this.Save();
+			break;
+		}
+	}while(true);
 	return initStatus;
 }
 // 创建新的用户组
@@ -93,10 +121,10 @@ exports.prototype.createNew = function( key, data ){	//	key:创建对象类型;d
 	if ( isFieldExists(data) ) {
 		if ( !isFieldExists(data.Name) || data.Name == "" )
 			data.Name = "GROUP-" + (this.Login.length||0);
-		if( isFieldExists(this[key][data.Name]) ){
-			feedback["STATUS"] = STATUS["999"];	//该用户组已存在!
-			return feedback;
-		}
+		// if( isFieldExists(this[key][data.Name]) ){
+		// 	feedback["STATUS"] = STATUS["999"];	//该用户组已存在!
+		// 	return feedback;
+		// }
 		this[key][data.Name] = new GOBAL[key]( data.Name, data );
 		feedback["DATA"] = this[key][data.Name];
 		feedback["STATUS"] = GOBAL.STATUS["000"];	//操作成功
@@ -139,7 +167,7 @@ exports.prototype.setName = function( formerName, Name ){	//Name:新用户组名
 	console.log(feedback);
 	if ( !isFieldExists(Name) || Name == "" )
 		data.Name = "GROUP-" + (this.Login.length||0);
-	if( isFieldExists(this[key][Name]) ){
+	if( isFieldExists(this.Login[Name]) ){
 		feedback["STATUS"] = STATUS["999"];	//该用户组已存在!
 		return feedback;
 	}
@@ -167,22 +195,33 @@ exports.prototype.convertGroup = function( formerGroup, LatterGroup, Name ){	//N
 	return feedback;
 }
 // 创建新的目录
-exports.prototype.createFile = function( key, data ){	//	key:创建对象类型;data:对象详情
+exports.prototype.createFile = function( key, data ){	//	key:创建对象所在目录对象;data:对象详情
 	var feedback = {
 		DATA:"",
 		STATUS:GOBAL.STATUS["999"]	//操作失败
 	};
-	console.log(key);
-	if( isFieldExists(this[key]) ){
-		feedback["STATUS"] = STATUS["999"];	//该文件已存在!
-		return feedback;
-	}
+	// console.log(JSON.stringify(this.Folder));
 	if ( isFieldExists(data) ) {
-		this[key] = new GOBAL[key]( key, data );
-		feedback["DATA"] = this[key];
-		feedback["STATUS"] = GOBAL.STATUS["000"];	//操作成功
-		return feedback;
+		if ( !isFieldExists(data.Name) || data.Name == "" )
+			data.Name = "NEW_FILE";
+		if ( !isFieldExists(key) || key == "" ){
+			key = {};
+			key[data.Name] = {};
+		}
+		// if( isFieldExists(key[data.Name]) ){
+		// 	feedback["STATUS"] = STATUS["999"];	//该文件已存在!
+		// 	return feedback;
+		// }
+		key[data.Name] = new GOBAL.Folder( key, data );
+		// console.log("1."+JSON.stringify(key[data.Name]));
+		// console.log("1."+JSON.stringify(key));
+		feedback["DATA"] = key[data.Name];
+		// feedback["STATUS"] = GOBAL.STATUS["000"];	//操作成功
+		feedback["STATUS"] = key[data.Name].STATUS;	//操作状态继承
+	} else {
+		feedback["STATUS"] = GOBAL.STATUS["999"];	//文件创建失败
 	}
+	return feedback;
 }
 // 刷新信息-用户数量更新
 exports.prototype.refresh = function(){
@@ -223,23 +262,33 @@ exports.prototype.Save = function(){
 			"Type":"文件夹"
 		}
 	};
-	if ( !isFieldExists(this["Login"]["ROOT"]) ) {
-		this.createNew("Login",tempData["ROOT"]);
+	do{
+		// console.log(JSON.stringify(this.Folder));
+		if ( !isFieldExists(this["Login"]["ROOT"]) ) {
+			this.createNew("Login",tempData["ROOT"]);
+		}else	if ( !isFieldExists(this["Login"]["USERS"]) ) {
+			this.createNew("Login",tempData["USERS"])
+		}else	if ( !isFieldExists(this["Folder"]) ) {
+			this["Folder"] = {};
+			this.createFile(this,tempData["Folder"])
+		}else{
+			console.log("ResourceStorage文件存储:"+JSON.stringify(local));
+			// 本地保存ResourceStorage文件
+			fs.writeFile( path.join(__dirname, '../ResourceStorage.json'), JSON.stringify(local) , function ( error ) {
+			  if (error) 
+			  	throw error;
+			  console.log('ResourceStorage set already!');
+			  local.Status("000");
+			});
+			break;
+		}
+	}while(true);
+	/* 每五分钟中执行一次文件存储 */
+	if (!isFieldExists(Interval)) {
+		Interval = setInterval(function() {
+		  local.Save();
+		}, 300000);
 	}
-	if ( !isFieldExists(this["Login"]["USERS"]) ) {
-		this.createNew("Login",tempData["USERS"])
-	}
-	if ( !isFieldExists(this["Folder"]) ) {
-		this.createFile("Folder",tempData["Folder"])
-	}
-	console.log("ResourceStorage文件存储:"+JSON.stringify(local));
-	// 本地保存ResourceStorage文件
-	fs.writeFile( path.join(__dirname, '../ResourceStorage.json'), JSON.stringify(local) , function ( error ) {
-	  if (error) 
-	  	throw error;
-	  console.log('ResourceStorage set already!');
-	  local.Status("000");
-	});
 }
 // 权限校验
 exports.prototype.AuthorizationCheck = function( Group, User, data, how ){	//User:使用者 data:待授权文件对象;how:实际操作

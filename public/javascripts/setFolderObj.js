@@ -6,7 +6,7 @@ var DATE = require( path.join(__dirname, '/setDateObj') );
 	文件对象设置
  */
 exports = module.exports = function( LeaderDir, data ){ // Type, Name, Password, Directory, Creator, Jurisdiction, Visibility
-	// console.log( data.Owner || data.Creator || "ROOT" );
+	// console.log( JSON.stringify(LeaderDir) );
 	try{
 		if ( !data.Type ) {
 			throw "创建文件发生错误!";
@@ -14,7 +14,6 @@ exports = module.exports = function( LeaderDir, data ){ // Type, Name, Password,
 		this.Name = ( data.Name && data.Name != "" ? data.Name: "NEW_FILE" );																					//文件名——————————————————|————自动命名为:NEW_FILE
 		this.Encryption = ( data.Password && data.Password != "" ? 1 : 0 );																						//文件是否加密————————————|————1-已加密 0-未加密
 		this.Password = ( data.Password && data.Password != "" ? data.Password : "" );																//文件密码————————————————|
-		this.Directory = ( LeaderDir || "FILE" );																																			//所在目录————————————————|
 		this.Creator = ( data.Creator && data.Creator != "" ? data.Creator: "" );																			//文件创建者——————————————|
 		this.setOwner( data.Owner || data.Creator || "ROOT" );																												//文件所有者——————————————|————Owner 默认为文件创建者
 		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction.length == 3 ? data.Jurisdiction : "777");				//文件权限————————————————|————用户-所在组-其他组 READ-4 WRITE-2 FUNCTION-1 NONE-0
@@ -25,6 +24,7 @@ exports = module.exports = function( LeaderDir, data ){ // Type, Name, Password,
 		this.init( data.Type, data.Contain, data.Size );																															//文件初始化——————————————|————Type Contain Size
 
 		// this.Number:"",																																														//文件编号————————————————|————自动编号
+		// this.Directory = ( LeaderDir || "FILE" );																																			//所在目录————————————————|
 		// this.DirectoryDetailed:( data.Directory && data.Directory != "" ? data.Directory : "" ),										//文件绝对位置————————————|
 	} catch( error ) {
 		this.Status("999");																																														//状态标识————————————————|————STATUS
@@ -195,26 +195,26 @@ exports.prototype.Status = function( data ){
 }
 
 /* 快捷工具函数 */
-// 文件类型判断
-function isFolder(e){
-	if (e.indexOf("文件夹")!=-1) {
-		return true;
-	}else{
-		return false;
+	// 文件类型判断
+	function isFolder(e){
+		if (e.indexOf("文件夹")!=-1) {
+			return true;
+		}else{
+			return false;
+		}
 	}
-}
-// 字段存在性验证
-function isFieldExists(e){
-	if (e&&e!=undefined) {
-		return true;
-	}else{
-		return false;
+	// 字段存在性验证
+	function isFieldExists(e){
+		if (e&&e!=undefined) {
+			return true;
+		}else{
+			return false;
+		}
 	}
-}
-//判断对象是否为空
-function isEmptyObject(e){
-    var t;
-    for (t in e)
-        return !1;
-    return !0;
-};
+	//判断对象是否为空
+	function isEmptyObject(e){
+	    var t;
+	    for (t in e)
+	        return !1;
+	    return !0;
+	};
