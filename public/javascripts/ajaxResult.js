@@ -182,11 +182,21 @@ exports.prototype.newGroup = function(data){
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )	return;
 	// 判断[登陆]用户所在用户组权限
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
-	// 创建["Login"]下新用户组 Name:用户组名 Jurisdiction:用户组权限
-	var tempFun = Dir.createNew( "Login",data["currentOperation"].OpObject );
-	TempForResponse = tempFun.DATA;
-	this.turnBack(tempFun["STATUS"].Num,TempForResponse);
-	return;
+	// 用户组名格式化
+	if ( !isFieldExists(data["currentOperation"].OpObject.Name) || data["currentOperation"].OpObject.Name == "" )
+		data["currentOperation"].OpObject.Name = "GROUP-" + (Dir.Login.length||0);
+	// 用户组存在性验证
+	if( isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Name]) ){
+		// 该用户组已存在!
+		this.turnBack("999",TempForResponse);
+		return;
+	} else {
+		// 创建["Login"]下新用户组 Name:用户组名 Jurisdiction:用户组权限
+		var tempFun = Dir.createNew( "Login",data["currentOperation"].OpObject );
+		TempForResponse = tempFun.DATA;
+		this.turnBack(tempFun["STATUS"].Num,TempForResponse);
+		return;
+	}
 }
 //新建->A用户组下->B用户
 exports.prototype.newGroupUser = function(data){
@@ -202,6 +212,15 @@ exports.prototype.newGroupUser = function(data){
 	}
 	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
 		// 请输入正确的创建用户所在的用户组
+		this.turnBack("999",TempForResponse);
+		return;
+	}
+	// 用户名格式化
+	if ( !isFieldExists(data["currentOperation"].OpObject.Name) || data["currentOperation"].OpObject.Name == "" )
+		data["currentOperation"].OpObject.Name = Dir["Login"][data["currentOperation"].OpObject.Group].Name + (Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded.length||0);
+	// 用户存在性验证
+	if( isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data.Name]) ){
+		// 该用户已存在!
 		this.turnBack("999",TempForResponse);
 		return;
 	}
@@ -424,6 +443,15 @@ exports.prototype.newFolder = function(data){
 			// console.log(temp);
 		// 文件夹判断
 		if ( isFolder(temp.Dir.Type) ) {
+			// 文件名格式化
+			if ( !isFieldExists(data["currentOperation"].OpObject.Name) || data["currentOperation"].OpObject.Name == "" )
+				data["currentOperation"].OpObject.Name = "NEW_FILE";
+			// 文件存在性验证
+			if( isFieldExists(temp.Dir.Contain[data["currentOperation"].OpObject.Name]) ){
+				// 文件已存在
+				this.turnBack("999",TempForResponse);
+				return;
+			}
 			// 判断[登陆]用户是否有该文件修改权限
 			if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,4) ) return;
 			// console.log(data["currentOperation"].OpObject);
