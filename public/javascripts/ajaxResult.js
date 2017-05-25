@@ -154,11 +154,11 @@ exports.prototype.checkGroups = function(data){
 	} else if ( !isFieldExists(data["currentOperation"].OpObject.User) ) {
 		// ["Login"]下[Group]用户组所有用户->信息取出
 		TempForResponse.NameList = [];
-		TempForResponse.DetailList = [];
+		TempForResponse.DetailList = {};
 		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded )
 			TempForResponse.NameList.push(key);
 		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group] )
-			if (key != "UsersIncluded") {
+			if ( key != "UsersIncluded" && typeof Dir["Login"][data["currentOperation"].OpObject.Group][key] != "object" ) {
 				TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group][key];
 			}
 		// 数据读取成功
@@ -167,9 +167,10 @@ exports.prototype.checkGroups = function(data){
 	} else {
 		// ["Login"]下[Group]用户组所下[User]用户->信息取出
 		TempForResponse.NameList = [];
-		TempForResponse.DetailList = [];
-		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentUser"].User] )
-			TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentUser"].User][key];
+		TempForResponse.DetailList = {};
+		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User] )
+			if ( typeof Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key] != "object" )
+			TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key];
 		// 数据读取成功
 		this.turnBack("000",TempForResponse);
 		return;
