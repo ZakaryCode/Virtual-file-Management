@@ -129,6 +129,11 @@ exports = module.exports = {
 		Judge:false,
 		Info:"文件下无法创建文件夹!"
 	},
+	"834":{
+		Num:"834",
+		Judge:false,
+		Info:"文件夹下为空!"
+	},
 	"900":{
 		Num:"900",
 		Judge:false,

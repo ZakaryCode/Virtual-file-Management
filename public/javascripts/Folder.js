@@ -20,8 +20,7 @@ GLOBAL.Folder.checkFolder = function(data){
 GLOBAL.Folder.checkFolderAll = function(data){
 	// console.log(data);
 	var OpObject = {
-		Name:(isFieldExists(data[1])?data[1]:""),
-		// UserPassword:(isFieldExists(data[2])?data[2]:"")
+		Name:(isFieldExists(data[1])?data[1]:""),//visible
 	}
 	GLOBAL.Compiler.AJAX( "Folder", "checkFolderAll", OpObject, getObjectSuc );
 };

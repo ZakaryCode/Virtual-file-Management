@@ -43,7 +43,7 @@ exports.prototype.init = function( Type, Contain, Size ){//Type-文件夹类型/
 				this.Contain[key] = new exports( this, Contain[key] );
 			}
 		else
-			this.Contain = [];
+			this.Contain = {};
 	} else {
 		// 普通文件类型
 		this.Contain = ( Contain || "" );

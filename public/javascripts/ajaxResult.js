@@ -391,43 +391,68 @@ exports.prototype.checkFolder = function(data){
 		return;
 	}
 }
-//显示->指定目录下所有文件 --可见 --不可见 //显示->指定目录文件内容
+//显示->指定目录下所有文件 --可见 --所有 //显示->指定目录文件内容
 exports.prototype.checkFolderAll = function(data){
 	var TempForResponse = {};
+	TempForResponse.Contain = [];
 	// 判断[登陆]用户存在状态
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )	return;
 	// 当前目录验证
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 		// console.log(temp);
 	if( temp.states ) {
-		// 当前文件夹不为空且填写查找的下一级路径名字
-		if ( temp.Dir["Contain"].length != 0 && !isFieldExists(data["currentOperation"].OpObject.Name )) {
-			// 判断[登陆]用户是否有该文件是否存在
-			if (isFieldExists( temp.Dir["Contain"][data["currentOperation"].OpObject.Name] )) {
-				// 判断[登陆]用户是否有该文件修改权限
-				if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],2) ) return;
-				if ( isFolder(temp.Dir["Type"]) ) {
-					// 文件夹类型
+		// 当前文件夹不为空				/*且填写查找的下一级路径名字*/
+		if ( !isEmptyObject(temp.Dir["Contain"]) ) {
+			if(isFieldExists( data["currentOperation"].OpObject.Name )) {
+				// console.log(data["currentOperation"].OpObject.Name);
+				if( data["currentOperation"].OpObject.Name == "true" || data["currentOperation"].OpObject.Name == "false" || data["currentOperation"].OpObject.Name == "" ) {
+					// 查看文件夹文件
 					for( key in temp.Dir["Contain"])
-						TempForResponse.Contain.push(key);
-				}else{
-					// 普通文件类型
-					TempForResponse.Contain.push(temp.Dir["Contain"]);
+						if( data["currentOperation"].OpObject.Name == true && temp.Dir["Contain"][key].Visibility == 1 )
+							TempForResponse.Contain.push(key);
+						else if( data["currentOperation"].OpObject.Name == false )
+							TempForResponse.Contain.push(key);
+					// 操作成功
+					this.turnBack("120",TempForResponse);
+					return;
+				} else {
+					//查看文件夹下文件内容
+					// console.log(isFieldExists( temp.Dir["Contain"][data["currentOperation"].OpObject.Name] ));
+					// 判断是否有该文件是否存在
+					if (isFieldExists( temp.Dir["Contain"][data["currentOperation"].OpObject.Name] )) {
+						// 判断[登陆]用户是否有该文件查看权限
+						if (!this.UserPrivilegeDetection(data["currentUser"].Group, data["currentUser"].Name, temp.Dir["Contain"][data["currentOperation"].OpObject.Name], 2))
+							return;
+						// 普通文件类型
+						console.log(12)
+						TempForResponse.Contain.push(temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["Contain"]);
+						// 操作成功
+						this.turnBack("120", TempForResponse);
+						return;
+					} else {
+						// 查找项目不存在
+						this.turnBack("831", TempForResponse);
+						return;
+					}
 				}
+			} else {
+				// 查看文件夹文件
+				for( key in temp.Dir["Contain"])
+					if( temp.Dir["Contain"][key].Visibility == 1 )
+						TempForResponse.Contain.push(key);
 				// 操作成功
 				this.turnBack("120",TempForResponse);
 				return;
-			} else {
-				// 查找项目不存在
-				this.turnBack("831",TempForResponse);
-				return;
 			}
 		} else {
-			// 查找项目不存在
-			this.turnBack("831",TempForResponse);
+			// 文件夹为空
+			this.turnBack("834",TempForResponse);
 			return;
 		}
-	}else{
+	} else {
+		// 目录读取失败
+		this.turnBack("908",TempForResponse);
+		return;
 	}
 }
 //显示->指定目录详情
@@ -474,7 +499,7 @@ exports.prototype.newFolder = function(data){
 	// 当前目录验证
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 	if( temp.states ) {
-			// console.log(temp);
+			console.log(temp);
 		// 文件夹判断
 		if ( isFolder(temp.Dir.Type) ) {
 			// 文件名格式化
@@ -512,9 +537,15 @@ exports.prototype.deleteFolder = function(data){
 	// 当前目录验证
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 	if( temp.states ) {
+		if(!isFieldExists( data["currentOperation"].OpObject.Name )||!isFieldExists(temp.Dir["Contain"][data["currentOperation"].OpObject.Name])) {
+			// 请填入正确目录
+			this.turnBack("901",TempForResponse);
+			return;
+		}
+		console.log(JSON.stringify(temp.Dir["Contain"])+"--"+data["currentOperation"].OpObject.Name)
 		// 判断[登陆]用户是否有该文件修改权限
-		if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,4) ) return;
-		var tempFun = temp.Dir.deleteFolder(data["currentOperation"].OpObject[Name]);
+		if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],4) ) return;
+		var tempFun = temp.Dir.deleteFolder(data["currentOperation"].OpObject.Name);
 		TempForResponse = tempFun.DATA;
 		this.turnBack(tempFun["STATUS"].Num,TempForResponse);
 		return;

@@ -203,19 +203,17 @@ exports.prototype.createFile = function( key, data ){	//	key:创建对象所在�
 	};
 	// console.log(JSON.stringify(this.Folder));
 	if ( isFieldExists(data) ) {
-		if ( !isFieldExists(data.Name) || data.Name == "" )
+		if ( !isFieldExists(data.Name) || data.Name == "" )  {
 			data.Name = "NEW_FILE";
+		}
+		if( !isFieldExists(key[data.Type]) ){
+			data.Type = "文件夹";
+		}
 		if ( !isFieldExists(key) || key == "" ){
 			key = {};
 			key[data.Name] = {};
 		}
-		// if( isFieldExists(key[data.Name]) ){
-		// 	feedback["STATUS"] = STATUS["999"];	//该文件已存在!
-		// 	return feedback;
-		// }
 		key[data.Name] = new GOBAL.Folder( key, data );
-		// console.log("1."+JSON.stringify(key[data.Name]));
-		// console.log("1."+JSON.stringify(key));
 		feedback["DATA"] = key[data.Name];
 		// feedback["STATUS"] = GOBAL.STATUS["000"];	//操作成功
 		feedback["STATUS"] = key[data.Name].STATUS;	//操作状态继承
@@ -294,7 +292,7 @@ exports.prototype.Save = function(){
 // 权限校验
 exports.prototype.AuthorizationCheck = function( Group, User, data, how ){	//User:使用者 data:待授权文件对象;how:实际操作
 	var RIGHT = false;
-	// console.log(Group+"-"+ User+"-"+ data.Owner+"-"+ how);
+	console.log(Group+"-"+ User+"-"+ data.Owner+"-"+ how);
 	if ( User == data.Owner ) {
 		RIGHT = this.isFeasible( data.Jurisdiction[0], how );
 	} else if ( isFieldExists(data[Group][User]) ) {
