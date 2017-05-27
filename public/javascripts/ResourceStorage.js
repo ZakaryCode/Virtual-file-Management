@@ -14,9 +14,9 @@ exports = module.exports = function(){
 		// this.Folder = {};								//文件管理系统————|————根目录
 		this.Login = {};										//用户管理————————|————默认用户组ROOT USERS ; 其中ROOT组下有默认用户ROOT
 		this.refresh();											//用户总数量——————|————默认为0 UserTotal
-		this.Status("000");									//状态标识————————|————STATUS
+		this.Status("040");									//状态标识————————|————STATUS
 	} catch( error ) {
-		this.Status("999");									//状态标识————————|————STATUS
+		this.Status("913");									//状态标识————————|————STATUS
 		console.error( "ERROR:" + error );
 	}
 }
@@ -39,7 +39,7 @@ exports.prototype.init = function(){
 				else if ( local.Initialization( data ) ) {
 					// console.log('ResourceStorage set already!');
 				  // console.log( data.toString() );
-					local.Status("000");
+					local.Status("040");
 					// // 保存文件
 					// local.Save();
 			  } else {
@@ -62,15 +62,15 @@ exports.prototype.Initialization = function( data ){
 	var initStatus = true;
 	if( data.length != 0 )
 		for( key in data ){
-			if ( isFieldExists(data[key]) ) {
-				switch( key ){
+					if ( isFieldExists(data[key]) ) {
+						switch( key ){
 					case "Login":
 						if( data[key].length != 0 )
 							for( keyName in data[key] ){
 								this.createNew(key,this[key][keyName]);
 							}
 						break;
-					case "Folder": 
+					case "Folder":
 						this.createNew(key,this[key]);
 						break;
 					default:
@@ -122,12 +122,12 @@ exports.prototype.createNew = function( key, data ){	//	key:创建对象类型;d
 		if ( !isFieldExists(data.Name) || data.Name == "" )
 			data.Name = "GROUP-" + (this.Login.length||0);
 		// if( isFieldExists(this[key][data.Name]) ){
-		// 	feedback["STATUS"] = STATUS["999"];	//该用户组已存在!
+		// 	feedback["STATUS"] = STATUS["810"];	//该用户组已存在!
 		// 	return feedback;
 		// }
 		this[key][data.Name] = new GOBAL[key]( data.Name, data );
 		feedback["DATA"] = this[key][data.Name];
-		feedback["STATUS"] = GOBAL.STATUS["000"];	//操作成功
+		feedback["STATUS"] = GOBAL.STATUS["020"];	//操作成功
 	} else {
 		feedback["STATUS"] = GOBAL.STATUS["999"];	//用户组创建失败
 	}
@@ -141,9 +141,10 @@ exports.prototype.deleteGroup = function( Name ){
 	};
 	// console.log( (!isFieldExists(this.Login[Name]) || Name == "") );
 	if( !isFieldExists(this.Login[Name]) || Name == "" ){
-		feedback["STATUS"] = STATUS["999"];	//该用户组不存在!
+		feedback["STATUS"] = STATUS["811"];	//该用户组不存在!
 		return feedback;
 	}
+	// console.log(Name+":"+(Name != "ROOT" && Name != "USERS" && isEmptyObject(this.Login[Name].UsersIncluded)));
 	if ( Name != "ROOT" && Name != "USERS" && isEmptyObject(this.Login[Name].UsersIncluded) ) {
 		// console.log(this.Login[Name]);
 		feedback["DATA"] = this.Login[Name];
@@ -161,14 +162,14 @@ exports.prototype.setName = function( formerName, Name ){	//Name:新用户组名
 		STATUS:GOBAL.STATUS["999"]	//操作失败
 	};
 	if( !isFieldExists(this.Login[formerName]) || formerName == "" ){
-		feedback["STATUS"] = STATUS["999"];	//该用户组不存在!
+		feedback["STATUS"] = STATUS["811"];	//该用户组不存在!
 		return feedback;
 	}
 	console.log(feedback);
 	if ( !isFieldExists(Name) || Name == "" )
 		data.Name = "GROUP-" + (this.Login.length||0);
 	if( isFieldExists(this.Login[Name]) ){
-		feedback["STATUS"] = STATUS["999"];	//该用户组已存在!
+		feedback["STATUS"] = STATUS["810"];	//该用户组已存在!
 		return feedback;
 	}
 	this.Login[formerName].Name = Name;	//更改用户组名
@@ -185,7 +186,7 @@ exports.prototype.convertGroup = function( formerGroup, LatterGroup, Name ){	//N
 		STATUS:GOBAL.STATUS["999"]	//操作失败
 	};
 	if( isFieldExists(this.Login[LatterGroup].UsersIncluded[Name]) ){
-		feedback["STATUS"] = STATUS["999"];	//该用户已存在!
+		feedback["STATUS"] = STATUS["820"];	//该用户已存在!
 		return feedback;
 	}
 	this.Login[LatterGroup].UsersIncluded[Name] = this.Login[formerGroup].UsersIncluded[Name];
@@ -240,7 +241,7 @@ exports.prototype.Status = function( data ){
 	if ( isFieldExists(data) ) {
 		this.STATUS = GOBAL.STATUS[data];
 	} else if ( !isFieldExists(this.STATUS) ) {
-		this.STATUS = GOBAL.STATUS["000"];
+		this.STATUS = GOBAL.STATUS["999"];
 	}
 	// console.log(this.STATUS);
 	return this.STATUS["Judge"];
@@ -278,7 +279,7 @@ exports.prototype.Save = function(){
 			  if (error) 
 			  	throw error;
 			  console.log('ResourceStorage set already!');
-			  local.Status("000");
+			  local.Status("050");
 			});
 			break;
 		}

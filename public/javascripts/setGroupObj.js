@@ -10,16 +10,16 @@ exports = module.exports = function( LeaderDir, data ){ // Name, Jurisdiction
 	// console.log(LeaderDir,data);
 	try{
 		this.Name = ( data.Name && data.Name != "" ? data.Name: "GROUP" + (LeaderDir.length||0) );		//用户组名————————|
-		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction != 0 ? 1 : 0 );									//用户组权限——————|————1-PermissionGroup 0-NonPermissionGroup
-		this.CreationTime = ( data.CreationTime || DATE() );																					//用户组创建时间——|————当前时间
-		this.Size = ( data.Size || 0 );																																//用户组人数——————|
+		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction != 0 ? 1 : 0 );					//用户组权限———————|————1-PermissionGroup 0-NonPermissionGroup
+		this.CreationTime = ( data.CreationTime || DATE() );											//用户组创建时间—————|————当前时间
+		this.Size = ( data.Size || 0 );																	//用户组人数———————|
 		this.UsersIncluded = {};
-		this.Status("000");																																						//状态标识————————|————STATUS
-		this.init( data.UsersIncluded );																															//用户组包含用户——|————UsersIncluded(数组)
+		this.Status("020");																			//状态标识————————|————STATUS
+		this.init( data.UsersIncluded );																//用户组包含用户—————|————UsersIncluded(数组)
 
-		// this.Number = LeaderDir.length,																														//用户组编号——————|————自动编号
+		// this.Number = LeaderDir.length,																//用户组编号———————|————自动编号
 	} catch( error ) {
-		this.Status("999");																																						//状态标识————————|————STATUS
+		this.Status("911");																			//状态标识————————|————STATUS
 		console.error( "ERROR:" + error );
 	}
 	if ( LeaderDir == "ROOT" ) {
@@ -104,9 +104,10 @@ exports.prototype.deleteUser = function( data ){
 		return feedback;
 	}
 	if ( this.Name != "ROOT" && data != "ROOT" ) {
-		feedback["DATA"] = this.UsersIncluded[data];
+		feedback["DATA"] = this.UsersIncluded[data.Name];
 		feedback["STATUS"] = STATUS["000"];	//操作成功
-		feedback["STATUS"]["Judge"] = delete this.UsersIncluded[data];
+		feedback["STATUS"]["Judge"] = delete this.UsersIncluded[data.Name];;
+		// console.log(JSON.stringify(this));
 	} else {
 		feedback["STATUS"] = STATUS["999"];	//该用户无法删除
 	}
@@ -128,7 +129,7 @@ exports.prototype.Status = function( data ){
 	if ( isFieldExists(data) ) {
 		this.STATUS = STATUS[data];
 	} else if ( !isFieldExists(this.STATUS) ) {
-		this.STATUS = STATUS["000"];
+		this.STATUS = STATUS["999"];
 	}
 	return this.STATUS["Judge"];
 }

@@ -2,69 +2,206 @@
 	操作状态码
  */
 exports = module.exports = {
+/* 成功项目 */
 	"000":{
 		Num:"000",
 		Judge:true,
-		Info:"操作成功"
+		Info:"操作成功!"
+	},
+	"010":{
+		Num:"010",
+		Judge:true,
+		Info:"文件创建成功!"
+	},
+	"020":{
+		Num:"020",
+		Judge:true,
+		Info:"用户组创建成功!"
+	},
+	"030":{
+		Num:"030",
+		Judge:true,
+		Info:"用户创建成功!"
+	},
+	"040":{
+		Num:"040",
+		Judge:true,
+		Info:"系统初始化成功!"
+	},
+	"050":{
+		Num:"050",
+		Judge:true,
+		Info:"ResourceStorage set already!"//本地文件存储成功
+	},
+	"100":{
+		Num:"100",
+		Judge:true,
+		Info:"登陆成功!"
+	},
+	"110":{
+		Num:"110",
+		Judge:true,
+		Info:"注册成功!"
+	},
+	"120":{
+		Num:"120",
+		Judge:true,
+		Info:"数据读取成功!"
+	},
+	"130":{
+		Num:"130",
+		Judge:true,
+		Info:"目录读取成功!"
+	},
+/* 失败项目 */
+	"700":{
+		Num:"700",
+		Judge:false,
+		Info:"用户权限不足!"
+	},
+	"710":{
+		Num:"710",
+		Judge:false,
+		Info:"用户所在用户组权限不足!"
+	},
+	"800":{
+		Num:"800",
+		Judge:false,
+		Info:"找不到对应用户!"
+	},
+	"801":{
+		Num:"801",
+		Judge:false,
+		Info:"请输入密码!"
+	},
+	"802":{
+		Num:"802",
+		Judge:false,
+		Info:"密码错误!"
+	},
+	"810":{
+		Num:"810",
+		Judge:false,
+		Info:"指定用户组已存在!"
+	},
+	"811":{
+		Num:"811",
+		Judge:false,
+		Info:"指定用户组不存在!"
+	},
+	"812":{
+		Num:"812",
+		Judge:false,
+		Info:"找不到指定用户组!"
+	},
+	"820":{
+		Num:"820",
+		Judge:false,
+		Info:"指定用户已存在!"
+	},
+	"821":{
+		Num:"821",
+		Judge:false,
+		Info:"指定用户不存在!"
+	},
+	"822":{
+		Num:"822",
+		Judge:false,
+		Info:"找不到指定用户!"
+	},
+	"830":{
+		Num:"830",
+		Judge:false,
+		Info:"指定文件或文件夹已存在!"
+	},
+	"831":{
+		Num:"831",
+		Judge:false,
+		Info:"指定文件或文件夹不存在!"
+	},
+	"832":{
+		Num:"832",
+		Judge:false,
+		Info:"找不到指定文件或文件夹!"
+	},
+	"833":{
+		Num:"833",
+		Judge:false,
+		Info:"文件下无法创建文件夹!"
 	},
 	"900":{
 		Num:"900",
 		Judge:false,
-		Info:"请选择正确的操作模块 -Folder -Login"
+		Info:"请选择正确的操作模块! -Folder -Login"
 	},
 	"901":{
 		Num:"901",
 		Judge:false,
-		Info:"请填入正确目录"
+		Info:"请填入正确目录!"
 	},
 	"902":{
 		Num:"902",
 		Judge:false,
-		Info:"请填入当前用户"
+		Info:"请填入当前用户!"
 	},
 	"903":{
 		Num:"903",
 		Judge:false,
-		Info:"请填入正确当前用户组"
+		Info:"请填入正确当前用户组!"
 	},
 	"904":{
 		Num:"904",
 		Judge:false,
-		Info:"请填入正确当前用户名"
+		Info:"请填入正确当前用户名!"
 	},
 	"905":{
 		Num:"905",
 		Judge:false,
-		Info:"请填入当前操作"
+		Info:"请填入当前操作!"
 	},
 	"906":{
 		Num:"906",
 		Judge:false,
-		Info:"请填入正确当前操作类型"
+		Info:"请填入正确当前操作类型!"
 	},
 	"907":{
 		Num:"907",
 		Judge:false,
-		Info:"请填入正确当前操作对象"
+		Info:"请填入正确当前操作对象!"
 	},
-	// "908":{
-	// 	Num:"908",
-	// 	Judge:false,
-	// 	Info:"请填入正确目录"
-	// },
+	"908":{
+		Num:"908",
+		Judge:false,
+		Info:"目录读取失败!"
+	},
 	// "909":{
 	// 	Num:"909",
 	// 	Judge:false,
-	// 	Info:"请填入正确目录"
+	// 	Info:"请填入正确目录!"
 	// },
-	// "910":{
-	// 	Num:"910",
-	// 	Judge:false,
-	// 	Info:"请填入正确目录"
-	// },
+	"910":{
+		Num:"910",
+		Judge:false,
+		Info:"文件创建失败!"
+	},
+	"911":{
+		Num:"911",
+		Judge:false,
+		Info:"用户组创建失败!"
+	},
+	"912":{
+		Num:"912",
+		Judge:false,
+		Info:"用户创建失败!"
+	},
+	"913":{
+		Num:"913",
+		Judge:false,
+		Info:"系统初始化失败!"
+	},
 	"999":{
 		Num:"999",
 		Judge:false,
-		Info:"操作失败"
+		Info:"操作失败!"
 	}
 };

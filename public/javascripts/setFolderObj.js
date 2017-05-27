@@ -11,23 +11,23 @@ exports = module.exports = function( LeaderDir, data ){ // Type, Name, Password,
 		if ( !data.Type ) {
 			throw "创建文件发生错误!";
 		}
-		this.Name = ( data.Name && data.Name != "" ? data.Name: "NEW_FILE" );																					//文件名——————————————————|————自动命名为:NEW_FILE
-		this.Encryption = ( data.Password && data.Password != "" ? 1 : 0 );																						//文件是否加密————————————|————1-已加密 0-未加密
-		this.Password = ( data.Password && data.Password != "" ? data.Password : "" );																//文件密码————————————————|
-		this.Creator = ( data.Creator && data.Creator != "" ? data.Creator: "" );																			//文件创建者——————————————|
-		this.setOwner( data.Owner || data.Creator || "ROOT" );																												//文件所有者——————————————|————Owner 默认为文件创建者
-		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction.length == 3 ? data.Jurisdiction : "777");				//文件权限————————————————|————用户-所在组-其他组 READ-4 WRITE-2 FUNCTION-1 NONE-0
-		this.Visibility = ( data.Visibility && data.Visibility != 0 ? 1 : 0 );																				//文件可见性——————————————|————用户-所在组-其他组 VISIBLE-1 INVISIBLE-0
-		this.CreationTime = ( data.CreationTime || DATE() );																													//文件创建时间————————————|————当前时间
-		this.ModificationTime = ( data.ModificationTime || DATE() );																									//文件修改时间————————————|————默认为当前时间
-		this.Status("000");																																														//状态标识————————————————|————STATUS
-		this.init( data.Type, data.Contain, data.Size );																															//文件初始化——————————————|————Type Contain Size
+		this.Name = ( data.Name && data.Name != "" ? data.Name: "NEW_FILE" );												//文件名———————————|————自动命名为:NEW_FILE
+		this.Encryption = ( data.Password && data.Password != "" ? 1 : 0 );													//文件是否加密————————|————1-已加密 0-未加密
+		this.Password = ( data.Password && data.Password != "" ? data.Password : "" );										//文件密码——————————|
+		this.Creator = ( data.Creator && data.Creator != "" ? data.Creator: "" );											//文件创建者—————————|
+		this.setOwner( data.Owner || data.Creator || "ROOT" );																//文件所有者—————————|————Owner 默认为文件创建者
+		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction.length == 3 ? data.Jurisdiction : "777");				//文件权限——————————|————用户-所在组-其他组 READ-4 WRITE-2 FUNCTION-1 NONE-0
+		this.Visibility = ( data.Visibility && data.Visibility != 0 ? 1 : 0 );												//文件可见性—————————|————用户-所在组-其他组 VISIBLE-1 INVISIBLE-0
+		this.CreationTime = ( data.CreationTime || DATE() );																//文件创建时间————————|————当前时间
+		this.ModificationTime = ( data.ModificationTime || DATE() );														//文件修改时间————————|————默认为当前时间
+		this.Status("010");																								//状态标识——————————|————STATUS
+		this.init( data.Type, data.Contain, data.Size );																	//文件初始化—————————|————Type Contain Size
 
-		// this.Number:"",																																														//文件编号————————————————|————自动编号
-		// this.Directory = ( LeaderDir || "FILE" );																																			//所在目录————————————————|
-		// this.DirectoryDetailed:( data.Directory && data.Directory != "" ? data.Directory : "" ),										//文件绝对位置————————————|
+		// this.Number:"",																									//文件编号——————————|————自动编号
+		// this.Directory = ( LeaderDir || "FILE" );																		//所在目录——————————|
+		// this.DirectoryDetailed:( data.Directory && data.Directory != "" ? data.Directory : "" ),							//文件绝对位置————————|
 	} catch( error ) {
-		this.Status("999");																																														//状态标识————————————————|————STATUS
+		this.Status("910");																								//状态标识——————————|————STATUS
 		console.error( "ERROR:" + error );
 	}
 }
@@ -189,7 +189,7 @@ exports.prototype.Status = function( data ){
 	if ( isFieldExists(data) ) {
 		this.STATUS = STATUS[data];
 	} else if ( !isFieldExists(this.STATUS) ) {
-		this.STATUS = STATUS["000"];
+		this.STATUS = STATUS["999"];
 	}
 	return this.STATUS["Judge"];
 }

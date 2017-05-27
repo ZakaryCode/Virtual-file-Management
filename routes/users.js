@@ -17,11 +17,11 @@ router.post('/', function(req, res, next) {
   ajaxBodeRequest = req.body.input;
   /* 接口请求 */
   var ajaxResult = new Result(ajaxQuery,ajaxBodeRequest,function(){
-    res.send({
-      "query":ajaxQuery,
-      "request":ajaxBodeRequest,
-      "response":this["RESPONSE"],
-      "status":this["STATUS"],
+        res.send({
+          "query":ajaxQuery,
+          "request":ajaxBodeRequest,
+          "response":this["RESPONSE"],
+          "status":this["STATUS"],
     });
   });
 });

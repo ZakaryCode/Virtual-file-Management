@@ -83,7 +83,6 @@ exports.prototype.Folder = function(data){
 	}
 }
 
-
 /* 用户模块 */
 //查询->A用户->登陆 --名字存在 --密码正确
 exports.prototype.checkLogin = function(data){
@@ -104,16 +103,16 @@ exports.prototype.checkLogin = function(data){
 						TempForResponse.User = Dir["Login"][Group].UsersIncluded[data["currentOperation"].OpObject.UserName];
 						TempForResponse.Group = Group;
 						// 登陆成功
-						this.turnBack("000",TempForResponse);
+						this.turnBack("100",TempForResponse);
 						return;
 					} else {
 						// 密码错误
-						this.turnBack("999",TempForResponse);
+						this.turnBack("802",TempForResponse);
 						return;
 					}
 				} else {
 					// 密码未输入
-					this.turnBack("999",TempForResponse);
+					this.turnBack("801",TempForResponse);
 					return;
 				}
 			} else {
@@ -126,12 +125,12 @@ exports.prototype.checkLogin = function(data){
 			}
 		} else {
 			// 找不到对应用户
-			this.turnBack("999",TempForResponse);
+			this.turnBack("800",TempForResponse);
 			return;
 		}
 	} else {
 		// 找不到对应用户
-		this.turnBack("999",TempForResponse);
+		this.turnBack("800",TempForResponse);
 		return;
 	}
 }
@@ -141,6 +140,10 @@ exports.prototype.checkGroups = function(data){
 	// 判断[登陆]用户存在状态
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )
 		return;
+	if ( !isFieldExists(data["currentOperation"].OpObject) ) {
+		this.turnBack("999",TempForResponse);
+		return;
+	}
 	// 判断[登陆]用户是否输入用户组名
 	if ( !isFieldExists(data["currentOperation"].OpObject.Group) ) {
 		// ["Login"]下所有用户组->取出
@@ -149,9 +152,14 @@ exports.prototype.checkGroups = function(data){
 		for ( key in Dir["Login"])
 			TempForResponse.NameList.push(key);
 		// 数据读取成功
-		this.turnBack("000",TempForResponse);
+		this.turnBack("120",TempForResponse);
 		return;
 	} else if ( !isFieldExists(data["currentOperation"].OpObject.User) ) {
+		if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
+			// 该用户组不存在
+			this.turnBack("811",TempForResponse);
+			return;
+		}
 		// ["Login"]下[Group]用户组所有用户->信息取出
 		TempForResponse.NameList = [];
 		TempForResponse.DetailList = {};
@@ -162,9 +170,19 @@ exports.prototype.checkGroups = function(data){
 				TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group][key];
 			}
 		// 数据读取成功
-		this.turnBack("000",TempForResponse);
+		this.turnBack("120",TempForResponse);
 		return;
 	} else {
+		if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
+			// 该用户组不存在
+			this.turnBack("811",TempForResponse);
+			return;
+		}
+		if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User]) ) {
+			// 该用户不存在
+			this.turnBack("821",TempForResponse);
+			return;
+		}
 		// ["Login"]下[Group]用户组所下[User]用户->信息取出
 		TempForResponse.NameList = [];
 		TempForResponse.DetailList = {};
@@ -172,7 +190,7 @@ exports.prototype.checkGroups = function(data){
 			if ( typeof Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key] != "object" )
 			TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key];
 		// 数据读取成功
-		this.turnBack("000",TempForResponse);
+		this.turnBack("120",TempForResponse);
 		return;
 	}
 }
@@ -189,7 +207,7 @@ exports.prototype.newGroup = function(data){
 	// 用户组存在性验证
 	if( isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Name]) ){
 		// 该用户组已存在!
-		this.turnBack("999",TempForResponse);
+		this.turnBack("810",TempForResponse);
 		return;
 	} else {
 		// 创建["Login"]下新用户组 Name:用户组名 Jurisdiction:用户组权限
@@ -208,12 +226,12 @@ exports.prototype.newGroupUser = function(data){
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
 	if ( !isFieldExists(data["currentOperation"].OpObject) ) {
 		// 请输入正确的创建用户所在的用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
 		return;
 	}
 	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
 		// 请输入正确的创建用户所在的用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
 		return;
 	}
 	// 用户名格式化
@@ -222,7 +240,7 @@ exports.prototype.newGroupUser = function(data){
 	// 用户存在性验证
 	if( isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data.Name]) ){
 		// 该用户已存在!
-		this.turnBack("999",TempForResponse);
+		this.turnBack("820",TempForResponse);
 		return;
 	}
 	// 创建["Login"]下[Group]用户组新用户 Name:用户名 Jurisdiction:用户权限
@@ -241,12 +259,12 @@ exports.prototype.deleteGroup = function(data){
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
 	if ( !isFieldExists(data["currentOperation"].OpObject) ) {
 		// 该用户组不存在
-		this.turnBack("999",TempForResponse);
+		this.turnBack("811",TempForResponse);
 		return;
 	}
 	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
 		// 该用户组不存在
-		this.turnBack("999",TempForResponse);
+		this.turnBack("811",TempForResponse);
 		return;
 	}
 	// 删除["Login"]下[Group]用户组
@@ -265,12 +283,22 @@ exports.prototype.deleteGroupUser = function(data){
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
 	if ( !isFieldExists(data["currentOperation"].OpObject) ) {
 		// 无指定用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
 		return;
 	}
 	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
 		// 无指定用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
+		return;
+	}
+	if ( !isFieldExists(data["currentOperation"].OpObject.Name) ) {
+		// 该用户不存在
+		this.turnBack("821",TempForResponse);
+		return;
+	}
+	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.Name]) ) {
+		// 该用户不存在
+		this.turnBack("821",TempForResponse);
 		return;
 	}
 	// 删除["Login"]下[Group]用户组[Name]用户
@@ -289,12 +317,17 @@ exports.prototype.alterGroup = function(data){
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
 	if ( !isFieldExists(data["currentOperation"].OpObject) ) {
 		// 无指定用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
 		return;
 	}
-	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Group]) ) {
+	if ( !isFieldExists(Dir["Login"][data["currentOperation"].OpObject.Name]) ) {
 		// 无指定用户组
-		this.turnBack("999",TempForResponse);
+		this.turnBack("812",TempForResponse);
+		return;
+	}
+	if ( isFieldExists(Dir["Login"][data["currentOperation"].OpObject.alterName]) || data["currentOperation"].OpObject.alterName == "" ) {
+		// 用户组已存在
+		this.turnBack("810",TempForResponse);
 		return;
 	}
 	// 更改["Login"]下[Group]用户组 Name为alterName
@@ -334,7 +367,7 @@ exports.prototype.alterGroupUser = function(data){
 	for ( key in Dir["Login"][data["currentUser"].Group].UsersIncluded[data["currentUser"].Name] )
 		TempForResponse.DetailList[key](Dir["Login"][data["currentUser"].Group].UsersIncluded[data["currentUser"].Name][key]);
 	// 数据读取成功
-	this.turnBack("000",TempForResponse);//操作成功
+	this.turnBack("120",TempForResponse);//操作成功
 	return;
 }
 
@@ -350,11 +383,11 @@ exports.prototype.checkFolder = function(data){
 	// console.log(temp);
 	if( temp.states ) {
 		// 操作成功
-		this.turnBack("000",TempForResponse);
+		this.turnBack("130",TempForResponse);
 		return;
 	}else{
 		// 目录读取失败
-		this.turnBack("999",TempForResponse);
+		this.turnBack("908",TempForResponse);
 		return;
 	}
 }
@@ -382,16 +415,16 @@ exports.prototype.checkFolderAll = function(data){
 					TempForResponse.Contain.push(temp.Dir["Contain"]);
 				}
 				// 操作成功
-				this.turnBack("000",TempForResponse);
+				this.turnBack("120",TempForResponse);
 				return;
 			} else {
 				// 查找项目不存在
-				this.turnBack("999",TempForResponse);
+				this.turnBack("831",TempForResponse);
 				return;
 			}
 		} else {
 			// 查找项目不存在
-			this.turnBack("999",TempForResponse);
+			this.turnBack("831",TempForResponse);
 			return;
 		}
 	}else{
@@ -425,11 +458,11 @@ exports.prototype.checkFolderDetail = function(data){
 		}
 		console.log(TempForResponse);
 		// 操作成功
-		this.turnBack("000",TempForResponse);
+		this.turnBack("120",TempForResponse);
 		return;
 	} else {
 		// 目录读取失败
-		this.turnBack("999",TempForResponse);
+		this.turnBack("908",TempForResponse);
 		return;
 	}
 }
@@ -450,7 +483,7 @@ exports.prototype.newFolder = function(data){
 			// 文件存在性验证
 			if( isFieldExists(temp.Dir.Contain[data["currentOperation"].OpObject.Name]) ){
 				// 文件已存在
-				this.turnBack("999",TempForResponse);
+				this.turnBack("830",TempForResponse);
 				return;
 			}
 			// 判断[登陆]用户是否有该文件修改权限
@@ -462,12 +495,12 @@ exports.prototype.newFolder = function(data){
 			return;
 		}else{
 			// 文件下无法创建新文件
-			this.turnBack("999",TempForResponse);
+			this.turnBack("833",TempForResponse);
 			return;
 		}
 	}else{
 		// 目录读取失败
-		this.turnBack("999",TempForResponse);
+		this.turnBack("908",TempForResponse);
 		return;
 	}
 }
@@ -487,7 +520,7 @@ exports.prototype.deleteFolder = function(data){
 		return;
 	}else{
 		// 目录读取失败
-		this.turnBack("999",TempForResponse);
+		this.turnBack("908",TempForResponse);
 		return;
 	}
 }
@@ -551,7 +584,7 @@ exports.prototype.alterFolder = function(data){
 				TempForResponse.DetailList[key] = temp.Dir["Contain"][data["currentOperation"].OpObject.Name][key];
 	}
 	// 操作成功
-	this.turnBack("000",TempForResponse);
+	this.turnBack("120",TempForResponse);
 	return;
 }
 
@@ -581,7 +614,7 @@ exports.prototype.alterFolder = function(data){
 			return true;
 		} else {
 			if ( !isFieldExists(send) ) {
-				this.turnBack("999");	//用户组权限不足
+				this.turnBack("710");	//用户组权限不足
 			}
 			return false;
 		}
@@ -593,7 +626,7 @@ exports.prototype.alterFolder = function(data){
 			return true;
 		} else {
 			if ( !isFieldExists(send) ) {
-				this.turnBack("999");	//用户权限不足
+				this.turnBack("700");	//用户权限不足
 			}
 			return false;
 		}
@@ -618,7 +651,8 @@ exports.prototype.alterFolder = function(data){
 			states:false,
 			Dir:Dir
 		}
-		// console.log(Dir["Folder"]);
+		console.log(Data);
+		debugger;
 		if (Data.length<1){
 			return temp;
 		}	else if (Data.length == 1 && Data[0] == "FILE"){
