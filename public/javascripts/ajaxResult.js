@@ -8,7 +8,7 @@ if (Dir.init()) {
 	/* 每五分钟中执行一次文件存储 */
 	Interval = setInterval(function() {
 		Dir.Save();
-	}, 3000);
+	}, 300000);
 }
 exports = module.exports = function(ajaxQuery,ajaxBodeReques,callback){
 	// 验证回调正确
