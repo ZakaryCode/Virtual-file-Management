@@ -17,7 +17,7 @@ exports = module.exports = function( LeaderDir, data ){ // Type, Name, Password,
 		this.Creator = ( data.Creator && data.Creator != "" ? data.Creator: "" );											//文件创建者—————————|
 		this.setOwner( data.Owner || data.Creator || "ROOT" );																//文件所有者—————————|————Owner 默认为文件创建者
 		this.Jurisdiction = ( data.Jurisdiction && data.Jurisdiction.length == 3 ? data.Jurisdiction : "777");				//文件权限——————————|————用户-所在组-其他组 READ-4 WRITE-2 FUNCTION-1 NONE-0
-		this.Visibility = ( data.Visibility && data.Visibility != 0 ? 1 : 0 );												//文件可见性—————————|————用户-所在组-其他组 VISIBLE-1 INVISIBLE-0
+		this.Visibility = ( data.Visibility != 0 ? 1 : 0 );												//文件可见性—————————|————用户-所在组-其他组 VISIBLE-1 INVISIBLE-0
 		this.CreationTime = ( data.CreationTime || DATE() );																//文件创建时间————————|————当前时间
 		this.ModificationTime = ( data.ModificationTime || DATE() );														//文件修改时间————————|————默认为当前时间
 		this.Status("010");																								//状态标识——————————|————STATUS

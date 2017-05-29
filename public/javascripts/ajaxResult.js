@@ -4,8 +4,12 @@ var STATUS = require( path.join(__dirname, '/setStatusObj') );
 var ResourceStorage = require( path.join(__dirname, '/ResourceStorage') );
 var Dir = new ResourceStorage();	//	文件资源管理器
 /* 检测本地文件，初始化并检测状况 */
-Dir.init();
-
+if (Dir.init()) {
+	/* 每五分钟中执行一次文件存储 */
+	Interval = setInterval(function() {
+		Dir.Save();
+	}, 3000);
+}
 exports = module.exports = function(ajaxQuery,ajaxBodeReques,callback){
 	// 验证回调正确
 	if (typeof callback == "function") {
@@ -89,7 +93,7 @@ exports.prototype.checkLogin = function(data){
 	var TempForResponse = {};
 	var Group = this.QueryUser( data["currentOperation"].OpObject.UserName );	//获取用户对应用户组
 	// 是否找到对应用户
-		// console.log("GROUP:"+Group);
+	// console.log("GROUP:"+Group);
 	if ( Group && Group != false ) {
 		// 判断["Login"]下[Group]用户组对应[登陆]用户是否存在
 		if ( isFieldExists(Dir["Login"][Group].UsersIncluded[data["currentOperation"].OpObject.UserName]) ) {
@@ -163,6 +167,7 @@ exports.prototype.checkGroups = function(data){
 		// ["Login"]下[Group]用户组所有用户->信息取出
 		TempForResponse.NameList = [];
 		TempForResponse.DetailList = {};
+		TempForResponse.DetailList["Group"] = data["currentOperation"].OpObject.Group;
 		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded )
 			TempForResponse.NameList.push(key);
 		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group] )
@@ -186,6 +191,7 @@ exports.prototype.checkGroups = function(data){
 		// ["Login"]下[Group]用户组所下[User]用户->信息取出
 		TempForResponse.NameList = [];
 		TempForResponse.DetailList = {};
+		TempForResponse.DetailList["Group"] = data["currentOperation"].OpObject.Group;
 		for ( key in Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User] )
 			if ( typeof Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key] != "object" )
 			TempForResponse.DetailList[key] = Dir["Login"][data["currentOperation"].OpObject.Group].UsersIncluded[data["currentOperation"].OpObject.User][key];
@@ -344,28 +350,38 @@ exports.prototype.alterGroupUser = function(data){
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )	return;
 	// 判断[登陆]用户所在用户组权限
 	if ( !this.GroupPrivilegeDetection(data["currentUser"].Group) )	return;
-	for ( key in data["currentOperation"].OpObject )
+	// console.log(JSON.stringify(data));
+	for ( key in data["currentOperation"].OpObject.alter ) {
+		// console.log(data["currentOperation"].OpObject.former[key]);
+		// console.log(data["currentOperation"].OpObject.alter[key]);
 		switch( key ) {
 			case "Group":
-				if(data["currentOperation"].OpObject.Group != data["currentUser"].Group)
-					Dir.convertGroup( data["currentUser"].Group,data["currentOperation"].OpObject.Group,data["currentUser"].Name );
+				if(data["currentOperation"].OpObject.alter.Group != data["currentOperation"].OpObject.former.Group && data["currentOperation"].OpObject.alter.Group != "")
+					Dir.convertGroup( data["currentOperation"].OpObject.former.Group,data["currentOperation"].OpObject.alter.Group,data["currentOperation"].OpObject.former.Name );
 				break;
 			case "Name":
-				if(data["currentOperation"].OpObject.Name != data["currentUser"].Name)
-					Dir["Login"][data["currentUser"].Group].renameUser( data["currentUser"].Name,data["currentOperation"].OpObject.Name );
+				if(data["currentOperation"].OpObject.alter.Name != data["currentOperation"].OpObject.former.Name && data["currentOperation"].OpObject.alter.Name != "")
+					Dir["Login"][data["currentOperation"].OpObject.former.Group].renameUser( data["currentOperation"].OpObject.former.Name,data["currentOperation"].OpObject.alter.Name );
 				break;
 			case "Password":
 			case "NickName":
 			case "Gender":
 			case "Age":
-				if(data["currentOperation"].OpObject.Name != data["currentUser"].Name)
-					Dir["Login"][data["currentUser"].Group].UsersIncluded[data["currentUser"].Name]["set"+key]( data["currentOperation"].OpObject[key] );
+				if(data["currentOperation"].OpObject.alter.Group == data["currentOperation"].OpObject.former.Group)
+					if(data["currentOperation"].OpObject.alter.Name == data["currentOperation"].OpObject.former.Name)
+						if(data["currentOperation"].OpObject.alter[key] != data["currentOperation"].OpObject.former[key])
+							Dir["Login"][data["currentOperation"].OpObject.former.Group].UsersIncluded[data["currentOperation"].OpObject.former.Name]["set"+key]( data["currentOperation"].OpObject.alter[key] );
 				break;
 			default:
 		}
+	}
 	// 取出当前修改用户的信息
-	for ( key in Dir["Login"][data["currentUser"].Group].UsersIncluded[data["currentUser"].Name] )
-		TempForResponse.DetailList[key](Dir["Login"][data["currentUser"].Group].UsersIncluded[data["currentUser"].Name][key]);
+	TempForResponse.DetailList = {};
+	// console.log(Dir["Login"][data["currentOperation"].OpObject.alter.Group])
+	for ( keyName in Dir["Login"][data["currentOperation"].OpObject.alter.Group].UsersIncluded[data["currentOperation"].OpObject.alter.Name] ) {
+		// console.log(keyName+"-")
+		TempForResponse.DetailList[keyName] = Dir["Login"][data["currentOperation"].OpObject.alter.Group].UsersIncluded[data["currentOperation"].OpObject.alter.Name][keyName];
+	}
 	// 数据读取成功
 	this.turnBack("120",TempForResponse);//操作成功
 	return;
@@ -376,15 +392,25 @@ exports.prototype.alterGroupUser = function(data){
 exports.prototype.checkFolder = function(data){
 	// console.log(data["currentDirectory"][0]);
 	var TempForResponse = {};
+	TempForResponse.Path = [];
 	// 判断[登陆]用户存在状态
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )	return;
+	TempForResponse.Path = JSON.stringify(data["currentOperation"].OpObject.Path);
 	// 当前目录验证
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 	// console.log(temp);
 	if( temp.states ) {
-		// 操作成功
-		this.turnBack("130",TempForResponse);
-		return;
+		var tempAlter = this.QueryDir(temp.Dir,data["currentOperation"].OpObject.Path);
+		if (tempAlter.states) {	//对应目录正确
+			TempForResponse.Path = JSON.parse(TempForResponse.Path);
+			// 操作成功
+			this.turnBack("130",TempForResponse);
+			return;
+		} else {
+			// 目录读取失败
+			this.turnBack("908",TempForResponse);
+			return;
+		}
 	}else{
 		// 目录读取失败
 		this.turnBack("908",TempForResponse);
@@ -394,7 +420,7 @@ exports.prototype.checkFolder = function(data){
 //显示->指定目录下所有文件 --可见 --所有 //显示->指定目录文件内容
 exports.prototype.checkFolderAll = function(data){
 	var TempForResponse = {};
-	TempForResponse.Contain = [];
+	TempForResponse.NameList = [];
 	// 判断[登陆]用户存在状态
 	if( !this.isExisting(data["currentUser"].Group,data["currentUser"].Name) )	return;
 	// 当前目录验证
@@ -403,15 +429,19 @@ exports.prototype.checkFolderAll = function(data){
 	if( temp.states ) {
 		// 当前文件夹不为空				/*且填写查找的下一级路径名字*/
 		if ( !isEmptyObject(temp.Dir["Contain"]) ) {
+			// console.log(temp);
 			if(isFieldExists( data["currentOperation"].OpObject.Name )) {
+				// console.log(temp);
 				// console.log(data["currentOperation"].OpObject.Name);
 				if( data["currentOperation"].OpObject.Name == "true" || data["currentOperation"].OpObject.Name == "false" || data["currentOperation"].OpObject.Name == "" ) {
 					// 查看文件夹文件
-					for( key in temp.Dir["Contain"])
-						if( data["currentOperation"].OpObject.Name == true && temp.Dir["Contain"][key].Visibility == 1 )
-							TempForResponse.Contain.push(key);
+					for( key in temp.Dir["Contain"]){
+						console.log(key);
+						if( data["currentOperation"].OpObject.Name != false && temp.Dir["Contain"][key].Visibility == 1 )
+							TempForResponse.NameList.push(key);
 						else if( data["currentOperation"].OpObject.Name == false )
-							TempForResponse.Contain.push(key);
+							TempForResponse.NameList.push(key);
+					}
 					// 操作成功
 					this.turnBack("120",TempForResponse);
 					return;
@@ -424,8 +454,8 @@ exports.prototype.checkFolderAll = function(data){
 						if (!this.UserPrivilegeDetection(data["currentUser"].Group, data["currentUser"].Name, temp.Dir["Contain"][data["currentOperation"].OpObject.Name], 2))
 							return;
 						// 普通文件类型
-						console.log(12)
-						TempForResponse.Contain.push(temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["Contain"]);
+						// console.log(12);
+						TempForResponse.NameList.push(JSON.stringify(temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["Contain"]));
 						// 操作成功
 						this.turnBack("120", TempForResponse);
 						return;
@@ -436,10 +466,13 @@ exports.prototype.checkFolderAll = function(data){
 					}
 				}
 			} else {
+				// console.log(123);
 				// 查看文件夹文件
-				for( key in temp.Dir["Contain"])
+				for( key in temp.Dir["Contain"]){
+					console.log(key);
 					if( temp.Dir["Contain"][key].Visibility == 1 )
-						TempForResponse.Contain.push(key);
+						TempForResponse.NameList.push(key);
+				}
 				// 操作成功
 				this.turnBack("120",TempForResponse);
 				return;
@@ -464,15 +497,15 @@ exports.prototype.checkFolderDetail = function(data){
 	var temp = this.QueryDir( Dir, data["currentDirectory"] );
 	if( temp.states ) {
 		// console.log(temp.Dir);
-		// 当前文件夹不为空且填写查找的下一级路径名字，显示当前目录详情 
+		// 当前文件夹不为空且填写查找的下一级路径名字，否则显示当前目录详情
 		if ( temp.Dir["Contain"].length != 0 && !isFieldExists(data["currentOperation"].OpObject.Name )) {
-			// 判断[登陆]用户是否有该文件是否存在
+			// 判断是否有该文件是否存在
 			if (isFieldExists( temp.Dir["Contain"][data["currentOperation"].OpObject.Name] )) {
 				temp.Dir = temp.Dir["Contain"][data["currentOperation"].OpObject.Name];
 			}
 		}
 		// console.log(TempForResponse);
-		// 判断[登陆]用户是否有该文件修改权限
+		// 判断[登陆]用户是否有该文件查看权限
 		if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,2) ) return;
 		TempForResponse.DetailList = {};
 		for( key in temp.Dir ){
@@ -568,36 +601,40 @@ exports.prototype.alterFolder = function(data){
 				case "Path":
 					// 判断[登陆]用户是否有该文件修改权限
 					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir,4) ) return;
-					if (isFieldExists(temp.Dir["Contain"][data["currentOperation"].OpObject.Name])) {
-						var tempAlter = this.QueryDir(Dir,data["currentOperation"].OpObject.Path);
-						if (tempAlter.states) {	//对应目录正确
-							tempAlter.Dir[data["currentOperation"].OpObject.Name] = temp.Dir["Contain"][data["currentOperation"].OpObject.Name];
-							delete temp.Dir["Contain"][data["currentOperation"].OpObject.Name];
-							// this.turnBack("000",TempForResponse);//操作成功
-							// return;
-						}
+					if(data["currentOperation"].OpObject.alter.Path != data["currentOperation"].OpObject.former.Path)
+						if (isFieldExists(temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name])) {
+							var tempAlter = this.QueryDir(temp.Dir,data["currentOperation"].OpObject.alter.Path);
+							if (tempAlter.states) {	//对应目录正确
+								tempAlter.Dir[data["currentOperation"].OpObject.former.Name] = temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name];
+								delete temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name];
+								// this.turnBack("000",TempForResponse);//操作成功
+								// return;
+							}
 					}
 					break;
 				case "Name":
 					// 判断[登陆]用户是否有该文件修改权限
-					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],4) ) return;
-					if (isFieldExists(temp.Dir["Contain"][data["currentOperation"].OpObject.Name])) {
-						temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["set"+key](temp.Dir["Contain"][data["currentOperation"].OpObject.Name],data["currentOperation"].OpObject.alterName);
-						// this.turnBack("000",TempForResponse);//操作成功
-						// return;
-					}
+					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name],4) ) return;
+					if(data["currentOperation"].OpObject.alter.Name != data["currentOperation"].OpObject.former.Name)
+						if (isFieldExists(temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name])) {
+							temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name]["set"+key](temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name],data["currentOperation"].OpObject.alter.Name);
+							// this.turnBack("000",TempForResponse);//操作成功
+							// return;
+						}
 					break;
 				case "Owner":
 					// 判断[登陆]用户是否有该文件修改权限
-					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],4) ) return;
-					if (this.QueryUser(temp.Dir["Contain"][data["currentOperation"].OpObject.Owner])) {
-						temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["set"+key](data["currentOperation"].OpObject.OpObject[key]);
-					}
+					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name],4) ) return;
+					if(data["currentOperation"].OpObject.alter.Owner != data["currentOperation"].OpObject.former.Owner)
+						if (this.QueryUser(temp.Dir["Contain"][data["currentOperation"].OpObject.former.Owner])) {
+							temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name]["set"+key](data["currentOperation"].OpObject.alter[key]);
+						}
 					break;
 				case "Jurisdiction":
 					// 判断[登陆]用户所在用户组权限 和 [登陆]用户是否有该文件修改权限
-					if ( !this.GroupPrivilegeDetection(data["currentUser"].Group,true) || this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],4,true) ) {
-						temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["set"+key](data["currentOperation"].OpObject[key]);
+					if ( !this.GroupPrivilegeDetection(data["currentUser"].Group,true) || this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name],4,true) ) {
+						if(data["currentOperation"].OpObject.alter.Jurisdiction != data["currentOperation"].OpObject.former.Jurisdiction)
+							temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name]["set"+key](data["currentOperation"].OpObject.alter[key]);
 					}
 					break;
 				case "Visibility":
@@ -605,14 +642,15 @@ exports.prototype.alterFolder = function(data){
 				case "Contain":
 				case "Password":
 					// 判断[登陆]用户是否有该文件修改权限
-					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.Name],4) ) return;
-					temp.Dir["Contain"][data["currentOperation"].OpObject.Name]["set"+key](data["currentOperation"].OpObject[key]);
+					if ( !this.UserPrivilegeDetection(data["currentUser"].Group,data["currentUser"].Name,temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name],4) ) return;
+					if(data["currentOperation"].OpObject.alter[key] != data["currentOperation"].OpObject.former[key])
+						temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name]["set"+key](data["currentOperation"].OpObject.alter[key]);
 					break;
 				default:
 			}
-		for( key in temp.Dir["Contain"][data["currentOperation"].OpObject.Name] )
+		for( key in temp.Dir["Contain"][data["currentOperation"].OpObject.former.Name] )
 			if(key != "Contain")
-				TempForResponse.DetailList[key] = temp.Dir["Contain"][data["currentOperation"].OpObject.Name][key];
+				TempForResponse.DetailList[key] = temp.Dir["Contain"][data["currentOperation"].OpObject.former.alter][key];
 	}
 	// 操作成功
 	this.turnBack("120",TempForResponse);

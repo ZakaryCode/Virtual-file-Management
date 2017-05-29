@@ -82,13 +82,40 @@ GLOBAL.Login.alterGroup = function(data){
 	}
 	GLOBAL.Compiler.AJAX( "Login", "alterGroup", OpObject, getObjectSuc );
 };
-//更改->A用户组->B用户->名字 密码 其他
+//更改->A用户组->B用户
 GLOBAL.Login.alterGroupUser = function(data){
 // console.log(data);
+	if(!isFieldExists(data[1])) {
+		line( "请输入要修改用户的用户组" , false )
+		return;
+	} else if (!isFieldExists(data[2])) {
+		line( "请输入要修改用户的用户名" , false )
+		return;
+	} else{
+		var OpObject = {
+			Group:data[1],
+			User:data[2]
+		}
+		GLOBAL.Compiler.AJAX( "Login", "checkGroups", OpObject, getWObjectSuc );
+	}
+};
+//更改->A用户组->B用户->名字 密码 其他
+function alterGroupUserSubmit(data){
+getFocus(true);
+// console.log(data.children);
 var OpObject = {
-	// UserName:data[1],
-	// UserPassword:(data[2]||"")
+	former:{},
+	alter:{}
+};
+for(key in data.children) {
+	// console.log(key +"-"+ JSON.stringify(data.children[key].children[1].innerHTML)+"-"+JSON.stringify(data.children[key].children[1].attributes["former"].nodeValue));
+	if(typeof data.children[key].children != "undefined"&&data.children[key].children[1]!=undefined) {
+		// console.log(key +"-"+ JSON.stringify(data.children[key].children[1])+"-"+JSON.stringify(data.children[key].children[1].attributes["former"].nodeValue));
+		OpObject.former[data.children[key].id] = data.children[key].children[1].innerHTML;
+		OpObject.alter[data.children[key].id] = data.children[key].children[1].attributes["former"].nodeValue;
+	}
 }
+// console.log(JSON.stringify(OpObject))
 GLOBAL.Compiler.AJAX( "Login", "alterGroupUser", OpObject, getObjectSuc );
 };
 
@@ -134,11 +161,11 @@ GLOBAL.Compiler.AJAX( "Login", "alterGroupUser", OpObject, getObjectSuc );
 		}
 		line( "Function login it success!" , false );
 	}
-	// 登陆回调接口
+	// 详情显示接口
 	function ShowDetail(data){
 	  if (line( "<b>|----ShowDetail----|<b>" , false )) {
 			if (data.status.Judge) {	//成功
-				if(line( data.status.Info , false ))
+				if(line( data.status.Info , false )){
 					if (isFieldExists( data.response.NameList ) && !isEmptyObject( data.response.NameList )) {
 						var funcName = "";
 						if (line( "<b>|----NameList----|<b>" , false )) {
@@ -165,6 +192,7 @@ GLOBAL.Compiler.AJAX( "Login", "alterGroupUser", OpObject, getObjectSuc );
 							}
 						}
 					}
+				}
 			} else {	//失败
 				line( data.status.Info , false );
 			}
@@ -175,7 +203,7 @@ GLOBAL.Compiler.AJAX( "Login", "alterGroupUser", OpObject, getObjectSuc );
 	function getObjectSuc(data){
 	  if (line( "<b>|----getObjectSuc----|<b>" , false )) {
 			if (data.status.Judge) {	//成功
-				if(line( data.status.Info , false ))
+				if(line( data.status.Info , false )) {
 					var funcName = "";
 					if (line( "<b>|----ObjectDetailList----|<b>" , false )) {
 						funcName += "<blockquote>";
@@ -188,6 +216,33 @@ GLOBAL.Compiler.AJAX( "Login", "alterGroupUser", OpObject, getObjectSuc );
 							line( "Hope it will help you!" , false );
 						}
 					}
+				}
+			} else {	//失败
+				line( data.status.Info , false );
+			}
+		}
+		line( "Function login it success!" , false );
+	}
+	// 可写对象返回接口
+	function getWObjectSuc(data){
+		getFocus(false);
+		if (line( "<b>|----getWObjectSuc----|<b>" , false )) {
+			if (data.status.Judge) {	//成功
+				if(line( data.status.Info , false )) {
+					var funcName = "";
+					if (line( "<b>|----ObjectDetailList----|<b>" , false )) {
+						funcName += "<blockquote>";
+						for(keyName in data.response.DetailList){
+							if(typeof data.response.DetailList[keyName] != "object")
+								funcName += "<p id='"+keyName+"'><b>"+(keyName)+"</b>:<span contenteditable='true' former ='"+data.response.DetailList[keyName]+"' >"+data.response.DetailList[keyName]+"</span></p>";
+						}
+						funcName += "<button style='background-color:#222;color:#999;border:1px solid #EEE;width:100%;float:right;' onclick='alterGroupUserSubmit(this.parentNode)'>提交</button>"
+							+"</blockquote>";
+						if ( line( funcName , false ) ){
+							line( "Hope it will help you!" , false );
+						}
+					}
+				}
 			} else {	//失败
 				line( data.status.Info , false );
 			}

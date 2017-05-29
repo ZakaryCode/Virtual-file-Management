@@ -4,6 +4,7 @@
 $(document).ready(function(){
 	var bodyHeight = $(window).height() - $("#header").height() * 4;
 	$("#body").height(bodyHeight);
+	getFocus(true);
 	line( "|————欢迎使用文件管理系统!————|" , false );
 	var STATUS = $("h1").attr("ResourceStorageStatus");
 	STATUS = JSON.parse(STATUS);
@@ -23,6 +24,7 @@ document.onkeydown=function(){
 	}else if (event.keyCode == 40){
 		keyUpOrDown(false);
 	}else{
-		$("#codeInput>pre>input").focus();
+		if( getFocus() == true )
+			$("#codeInput>pre>input").focus();
 	}
 }

@@ -11,7 +11,7 @@ GOBAL.Folder = require( path.join(__dirname, '/setFolderObj') );	//文件资源�
  */
 exports = module.exports = function(){
 	try{
-		// this.Folder = {};								//文件管理系统————|————根目录
+		// this.Folder = {};									//文件管理系统————|————根目录
 		this.Login = {};										//用户管理————————|————默认用户组ROOT USERS ; 其中ROOT组下有默认用户ROOT
 		this.refresh();											//用户总数量——————|————默认为0 UserTotal
 		this.Status("040");									//状态标识————————|————STATUS
@@ -53,17 +53,19 @@ exports.prototype.init = function(){
 			local.Save();
 		}
 	});
+	return true;
 }
 // 按数据流初始化数据结构
 exports.prototype.Initialization = function( data ){
 	// console.log(data);
 	if ( typeof data != 'object' )
 		data = eval( '(' + data + ')' );
-	var initStatus = true;
+	var initStatus = true,
+		local = this;
 	if( data.length != 0 )
 		for( key in data ){
-					if ( isFieldExists(data[key]) ) {
-						switch( key ){
+			if ( isFieldExists(data[key]) ) {
+				switch( key ){
 					case "Login":
 						if( data[key].length != 0 )
 							for( keyName in data[key] ){
@@ -105,7 +107,9 @@ exports.prototype.Initialization = function( data ){
 			this["Folder"] = {};
 			this.createFile(this["Folder"],tempData["Folder"])
 		}else{
-			this.Save();
+			var setTimeTri = setTimeout(function() {
+				local.Save();
+			}, 3000);
 			break;
 		}
 	}while(true);
@@ -282,12 +286,12 @@ exports.prototype.Save = function(){
 			break;
 		}
 	}while(true);
-	/* 每五分钟中执行一次文件存储 */
-	if (!isFieldExists(Interval)) {
-		Interval = setInterval(function() {
-		  local.Save();
-		}, 300000);
-	}
+	// /* 每五分钟中执行一次文件存储 */
+	// if (!isFieldExists(Interval)) {
+	// 	Interval = setInterval(function() {
+	// 	  local.Save();
+	// 	}, 3000);
+	// }
 }
 // 权限校验
 exports.prototype.AuthorizationCheck = function( Group, User, data, how ){	//User:使用者 data:待授权文件对象;how:实际操作

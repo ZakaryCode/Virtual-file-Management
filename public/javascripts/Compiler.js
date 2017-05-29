@@ -2,8 +2,17 @@ var GLOBAL = {
 	Compiler:{},
 	Folder:{},
 	Login:{},
-	countLine:0
+	countLine:0,
+	inputFocus:""
 };
+// 输入限制
+function getFocus(data) {
+if(data != undefined) {
+	GLOBAL.inputFocus = data;
+}
+// console.log(data+"-"+(data != "undefined")+"-"+GLOBAL.inputFocus);
+return GLOBAL.inputFocus;
+}
 // 按键回车
 function keyEnter(data){
 if( line( data , true ) ){
