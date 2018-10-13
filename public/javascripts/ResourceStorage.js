@@ -1,6 +1,6 @@
 var path = require('path');
 var fs = require("fs");
-var $ = require("jquery");
+var $ = require("./jquery.min");
 var GOBAL = {};
 var Interval;
 GOBAL.STATUS = require( path.join(__dirname, '/setStatusObj') );
